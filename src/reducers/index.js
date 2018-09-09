@@ -2,5 +2,5 @@ import { combineReducers } from 'redux';
 import exchangerReducer from './exchanger';
 
 export default combineReducers({
-    exchangerReducer,
+    exchanger: exchangerReducer,
 });

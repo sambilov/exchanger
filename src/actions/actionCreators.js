@@ -1,8 +1,12 @@
 import actionTypes from './actionTypes';
 
-export const setAccounts = (accounts) => ({
-    type: actionTypes.ACCNOUTS_SET,
+export const requestCurrencies = () => ({
+    type: actionTypes.CURRENCIES_REQUEST,
+});
+
+export const setCurrencies = (currencies) => ({
+    type: actionTypes.CURRENCIES_SET,
     payload: {
-        accounts,
+        currencies,
     },
 });

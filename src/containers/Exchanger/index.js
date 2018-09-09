@@ -1,10 +1,26 @@
+// @flow
+
 import * as React from 'react';
 import { connect } from 'react-redux';
+import type { Dispatch } from 'redux';
 import styled from 'styled-components';
+import { requestCurrencies } from '../../actions/actionCreators';
+import { exchangerSelector } from '../../selectors/exchanger';
 
-class Exchanger extends React.Component {
+type Props = {
+    dispatch: Dispatch<*>,
+    currencies: Array<Object>,
+    currectCurrencyKey: string,
+    exchangeToCurrencyKey: string,
+};
+
+class Exchanger extends React.Component<Props> {
 
     render() {
+        const { currencies } = this.props;
+
+        console.log(currencies);
+
         return (
             <HorizontalContainer>
                 <VerticalContainer>
@@ -37,7 +53,7 @@ const Body = styled.div`
 
 function mapStateToProps(state) {
     return {
-        state,
+        ...exchangerSelector(state),
     };
 }
 
