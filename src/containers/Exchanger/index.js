@@ -5,32 +5,50 @@ import { connect } from 'react-redux';
 import type { Dispatch } from 'redux';
 import styled from 'styled-components';
 import Carousel from 'nuka-carousel';
-import { requestCurrencies } from '../../actions/actionCreators';
-import { exchangerSelector, targetListSelector, initialListSelector } from '../../selectors/exchanger';
+import { requestCurrencies, setInitialCurrency, setTargetCurrency } from '../../actions/actionCreators';
+import { exchangerSelector, currenciesIndexSelector } from '../../selectors/exchanger';
 import type { Currency } from '../../typeDefinitions';
 import Card from '../../components/Card';
 
 type Props = {
     dispatch: Dispatch<*>,
-    initialList: Array<Currency>,
-    targetList: Array<Currency>,
+    currencies: Array<Currency>,
+    initialIndex: number,
+    targetIndex: number,
     initialCurrencyKey: string,
     targetCurrencyKey: string,
 };
 
 class Exchanger extends React.Component<Props> {
 
-    renderSection = (forInitialCurrency: boolean = false) => {
-        const { initialList, targetList } = this.props;
-        const currenciesList = forInitialCurrency ? initialList : targetList;
+    handleInitialBeforeSlide = (currentSlide: number, nextSlide: number) => {
+        const { dispatch, currencies } = this.props;
+        const newInitialCurrency = currencies[nextSlide];
+        
+        dispatch(setInitialCurrency(newInitialCurrency.key));
+    };
+
+    handleTargetBeforeSlide = (currentSlide: number, nextSlide: number) => {
+        const { dispatch, currencies } = this.props;
+        const newTargetCurrency = currencies[nextSlide];
+        
+        dispatch(setTargetCurrency(newTargetCurrency.key));
+    };
+
+    renderSection = (slideIndex: number, beforeSlideHandler: Function, isInitial: boolean = false) => {
+        const { currencies } = this.props;
 
         return (
-            <Section>
+            <Section isInitial={isInitial}>
                 <Carousel
                     wrapAround
-                    style={{ flex: 1 }}
+                    beforeSlide={beforeSlideHandler}
+                    slideIndex={slideIndex}
+                    style={{
+                        flex: 1,
+                    }}
                 >
-                    {currenciesList.map(currency => (<Card
+                    {currencies.map(currency => (<Card
                         key={currency.key}
                         currency={currency}
                     />))}
@@ -40,12 +58,14 @@ class Exchanger extends React.Component<Props> {
     };
 
     render() {
+        const { currencies, initialIndex, targetIndex } = this.props;
+
         return (
             <HorizontalContainer>
                 <VerticalContainer>
                     <Body>
-                        {this.renderSection(true)}
-                        {this.renderSection()}
+                        {this.renderSection(initialIndex, this.handleInitialBeforeSlide, true)}
+                        {this.renderSection(targetIndex, this.handleTargetBeforeSlide)}
                     </Body>
                 </VerticalContainer>
             </HorizontalContainer>
@@ -73,18 +93,19 @@ const Body = styled.div`
     background-color: #5badff;
     display: flex;
     flex-direction: column;
+    color: #ffffff;
 `;
 
 const Section = styled.div`
     flex: 1;
     display: flex;
+    background-color: ${props => props.isInitial ? '#236bb2' : '#5badff'};
 `;
 
 function mapStateToProps(state) {
     return {
         ...exchangerSelector(state),
-        initialList: initialListSelector(state),
-        targetList: targetListSelector(state),
+        ...currenciesIndexSelector(state),
     };
 }
 
