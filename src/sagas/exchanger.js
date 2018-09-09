@@ -1,6 +1,6 @@
 import { all, takeLatest, call, put } from 'redux-saga/effects';
 import actionTypes from '../actions/actionTypes';
-import { setCurrencies } from '../actions/actionCreators';
+import { setCurrencies, setInitialCurrency, setTargetCurrency } from '../actions/actionCreators';
 import { getRateUrl } from '../helpers';
 
 const currencies = [
@@ -19,7 +19,12 @@ const currencies = [
 ];
 
 function* requestCurrenciesSaga() {
+    const initialCurrency = currencies[0];
+    const lastCurrency = currencies[currencies.length - 1];
+
     yield put(setCurrencies(currencies));
+    yield put(setInitialCurrency(initialCurrency.key));
+    yield put(setTargetCurrency(lastCurrency.key));
 }   
 
 function* fetchCurrency(action) {

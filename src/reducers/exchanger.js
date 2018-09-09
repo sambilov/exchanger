@@ -1,22 +1,18 @@
 // @flow
 
 import actionTypes from '../actions/actionTypes';
-
-type Currency = {
-    key: string,
-    amount: number,
-};
+import type { Currency } from '../typeDefinitions';
 
 type State = {
     currencies: Array<Currency>,
-    currectCurrencyKey: string,
-    exchangeToCurrencyKey: string,
+    initialCurrencyKey: string,
+    targetCurrencyKey: string,
 };
 
 const initialState = {
     currencies: [],
-    currectCurrencyKey: '',
-    exchangeToCurrencyKey: '',
+    initialCurrencyKey: '',
+    targetCurrencyKey: '',
 };
 
 export default function exchangerReducer(state: State = initialState, action: Object) {
@@ -26,20 +22,17 @@ export default function exchangerReducer(state: State = initialState, action: Ob
         case actionTypes.CURRENCIES_SET:
             return {
                 ...state,
-                currencies: [
-                    {
-                        key: 'EUR',
-                        amount: 100,
-                    },
-                    {
-                        key: 'GBP',
-                        amount: 200,
-                    },
-                    {
-                        key: 'USD',
-                        amount: 300,
-                    },
-                ],
+                currencies: payload.currencies
+            };
+        case actionTypes.INITIAL_CURRENCY_SET:
+            return {
+                ...state,
+                initialCurrencyKey: payload.key,
+            };
+        case actionTypes.TARGET_CURRENCY_SET:
+            return {
+                ...state,
+                targetCurrencyKey: payload.key,
             };
         default:
             return state;

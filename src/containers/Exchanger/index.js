@@ -6,12 +6,14 @@ import type { Dispatch } from 'redux';
 import styled from 'styled-components';
 import { requestCurrencies } from '../../actions/actionCreators';
 import { exchangerSelector } from '../../selectors/exchanger';
+import type { Currency } from '../../typeDefinitions';
+import Card from '../../components/Card';
 
 type Props = {
     dispatch: Dispatch<*>,
-    currencies: Array<Object>,
-    currectCurrencyKey: string,
-    exchangeToCurrencyKey: string,
+    currencies: Array<Currency>,
+    initialCurrencyKey: string,
+    targetCurrencyKey: string,
 };
 
 class Exchanger extends React.Component<Props> {
@@ -25,7 +27,8 @@ class Exchanger extends React.Component<Props> {
             <HorizontalContainer>
                 <VerticalContainer>
                     <Body>
-                        exchanger
+                        <Card />
+                        <Card />
                     </Body>
                 </VerticalContainer>
             </HorizontalContainer>
@@ -48,7 +51,11 @@ const VerticalContainer = styled.div`
 `;
 
 const Body = styled.div`
-    
+    width: 400px;
+    height: 600px;
+    background-color: #5badff;
+    display: flex;
+    flex-direction: column;
 `;
 
 function mapStateToProps(state) {
