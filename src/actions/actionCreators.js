@@ -21,3 +21,10 @@ export const setConvertCurrencies = (initialCurrencyKey: string, targetCurrencyK
         targetCurrencyKey,
     },
 });
+
+export const setConvertRate = (convertRate: number) => ({
+    type: actionTypes.CONVERT_RATE_SET,
+    payload: {
+        convertRate,
+    }
+});

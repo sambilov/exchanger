@@ -1,6 +1,6 @@
 import { all, takeLatest, call, put, select } from 'redux-saga/effects';
 import actionTypes from '../actions/actionTypes';
-import { setCurrencies, setConvertCurrencies } from '../actions/actionCreators';
+import { setCurrencies, setConvertCurrencies, setConvertRate } from '../actions/actionCreators';
 import { getRateUrl } from '../helpers';
 
 const currencies = [
@@ -23,7 +23,7 @@ async function getRate(initialCurrencyKey, targetCurrencyKey) {
     const response = await fetch(rateUrl);
     const data = await response.json();
     const { rates } = data;
-    const rate = rates[targetCurrencyKey];
+    const rate = rates[targetCurrencyKey] || 1;
 
     return rate;
 }
@@ -40,7 +40,7 @@ function* fetchCurrenciesRateSaga(action) {
     const { payload: { initialCurrencyKey, targetCurrencyKey } } = action;
     const rate = yield getRate(initialCurrencyKey, targetCurrencyKey);
 
-    console.log(rate);
+    yield put(setConvertRate(rate));
 }
 
 export default function* echangerSaga() {

@@ -20,11 +20,8 @@ export default function exchangerReducer(state: State = initialState, action: Ob
 
     switch (type) {
         case actionTypes.CURRENCIES_SET:
-            return {
-                ...state,
-                currencies: payload.currencies
-            };
         case actionTypes.CONVERT_CURRENCIES_SET:
+        case actionTypes.CONVERT_RATE_SET:
             return {
                 ...state,
                 ...payload,
