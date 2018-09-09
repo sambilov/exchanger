@@ -24,15 +24,10 @@ export default function exchangerReducer(state: State = initialState, action: Ob
                 ...state,
                 currencies: payload.currencies
             };
-        case actionTypes.INITIAL_CURRENCY_SET:
+        case actionTypes.CONVERT_CURRENCIES_SET:
             return {
                 ...state,
-                initialCurrencyKey: payload.key,
-            };
-        case actionTypes.TARGET_CURRENCY_SET:
-            return {
-                ...state,
-                targetCurrencyKey: payload.key,
+                ...payload,
             };
         default:
             return state;

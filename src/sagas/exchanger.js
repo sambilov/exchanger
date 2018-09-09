@@ -1,6 +1,6 @@
-import { all, takeLatest, call, put } from 'redux-saga/effects';
+import { all, takeLatest, call, put, select } from 'redux-saga/effects';
 import actionTypes from '../actions/actionTypes';
-import { setCurrencies, setInitialCurrency, setTargetCurrency } from '../actions/actionCreators';
+import { setCurrencies, setConvertCurrencies } from '../actions/actionCreators';
 import { getRateUrl } from '../helpers';
 
 const currencies = [
@@ -18,24 +18,34 @@ const currencies = [
     },
 ];
 
+async function getRate(initialCurrencyKey, targetCurrencyKey) {
+    const rateUrl = getRateUrl(initialCurrencyKey);
+    const response = await fetch(rateUrl);
+    const data = await response.json();
+    const { rates } = data;
+    const rate = rates[targetCurrencyKey];
+
+    return rate;
+}
+
 function* requestCurrenciesSaga() {
     const initialCurrency = currencies[0];
     const lastCurrency = currencies[currencies.length - 1];
 
     yield put(setCurrencies(currencies));
-    yield put(setInitialCurrency(initialCurrency.key));
-    yield put(setTargetCurrency(lastCurrency.key));
+    yield put(setConvertCurrencies(initialCurrency.key, lastCurrency.key));
 }   
 
-function* fetchCurrency(action) {
-    const { payload: { currency } } = action;
-    const rateUrl = getRateUrl(currency);
-    const rates = yield call(fetch, rateUrl);
-    
+function* fetchCurrenciesRateSaga(action) {
+    const { payload: { initialCurrencyKey, targetCurrencyKey } } = action;
+    const rate = yield getRate(initialCurrencyKey, targetCurrencyKey);
+
+    console.log(rate);
 }
 
 export default function* echangerSaga() {
     yield all([
         takeLatest(actionTypes.CURRENCIES_REQUEST, requestCurrenciesSaga),
+        takeLatest(actionTypes.CONVERT_CURRENCIES_SET, fetchCurrenciesRateSaga),
     ]);
 }

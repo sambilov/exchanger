@@ -14,16 +14,10 @@ export const setCurrencies = (currencies: Array<Currency>) => ({
     },
 });
 
-export const setInitialCurrency = (key: string) => ({
-    type: actionTypes.INITIAL_CURRENCY_SET,
+export const setConvertCurrencies = (initialCurrencyKey: string, targetCurrencyKey: string) => ({
+    type: actionTypes.CONVERT_CURRENCIES_SET,
     payload: {
-        key,
-    },
-});
-
-export const setTargetCurrency = (key: string) => ({
-    type: actionTypes.TARGET_CURRENCY_SET,
-    payload: {
-        key,
+        initialCurrencyKey,
+        targetCurrencyKey,
     },
 });

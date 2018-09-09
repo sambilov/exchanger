@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import type { Dispatch } from 'redux';
 import styled from 'styled-components';
 import Carousel from 'nuka-carousel';
-import { requestCurrencies, setInitialCurrency, setTargetCurrency } from '../../actions/actionCreators';
+import { setConvertCurrencies } from '../../actions/actionCreators';
 import { exchangerSelector, currenciesIndexSelector } from '../../selectors/exchanger';
 import type { Currency } from '../../typeDefinitions';
 import Card from '../../components/Card';
@@ -21,28 +21,24 @@ type Props = {
 
 class Exchanger extends React.Component<Props> {
 
-    handleInitialBeforeSlide = (currentSlide: number, nextSlide: number) => {
-        const { dispatch, currencies } = this.props;
-        const newInitialCurrency = currencies[nextSlide];
-        
-        dispatch(setInitialCurrency(newInitialCurrency.key));
+    handleBeforeSlide = (isInitial: boolean, slideIndex: number) => {
+        const { dispatch, currencies, initialCurrencyKey, targetCurrencyKey } = this.props;
+        const newCurrency = currencies[slideIndex];
+        const newCurrencyKey = newCurrency.key;
+        const newInitialCurrencyKey = isInitial ? newCurrencyKey : initialCurrencyKey;
+        const newTargetCurrencyKey = isInitial ? targetCurrencyKey : newCurrencyKey;
+
+        dispatch(setConvertCurrencies(newInitialCurrencyKey, newTargetCurrencyKey));
     };
 
-    handleTargetBeforeSlide = (currentSlide: number, nextSlide: number) => {
-        const { dispatch, currencies } = this.props;
-        const newTargetCurrency = currencies[nextSlide];
-        
-        dispatch(setTargetCurrency(newTargetCurrency.key));
-    };
-
-    renderSection = (slideIndex: number, beforeSlideHandler: Function, isInitial: boolean = false) => {
+    renderSection = (slideIndex: number, isInitial: boolean = false) => {
         const { currencies } = this.props;
 
         return (
             <Section isInitial={isInitial}>
                 <Carousel
                     wrapAround
-                    beforeSlide={beforeSlideHandler}
+                    afterSlide={slideIndex => this.handleBeforeSlide(isInitial, slideIndex)}
                     slideIndex={slideIndex}
                     style={{
                         flex: 1,
@@ -64,8 +60,8 @@ class Exchanger extends React.Component<Props> {
             <HorizontalContainer>
                 <VerticalContainer>
                     <Body>
-                        {this.renderSection(initialIndex, this.handleInitialBeforeSlide, true)}
-                        {this.renderSection(targetIndex, this.handleTargetBeforeSlide)}
+                        {this.renderSection(initialIndex, true)}
+                        {this.renderSection(targetIndex)}
                     </Body>
                 </VerticalContainer>
             </HorizontalContainer>
