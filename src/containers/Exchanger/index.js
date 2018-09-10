@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import type { Dispatch } from 'redux';
 import styled from 'styled-components';
 import Carousel from 'nuka-carousel';
-import { setConvertCurrencies } from '../../actions/actionCreators';
+import { setConvertCurrencies, startConverRatePolling, endConverRatePolling } from '../../actions/actionCreators';
 import { exchangerSelector, currenciesIndexSelector } from '../../selectors/exchanger';
 import type { Currency } from '../../typeDefinitions';
 import Card from '../../components/Card';
@@ -17,9 +17,22 @@ type Props = {
     targetIndex: number,
     initialCurrencyKey: string,
     targetCurrencyKey: string,
+    convertRate: number,
 };
 
 class Exchanger extends React.Component<Props> {
+
+    componentDidMount() {
+        const { dispatch } = this.props;
+
+        dispatch(startConverRatePolling());
+    }
+
+    componentWillUnmount() {
+        const { dispatch } = this.props;
+
+        dispatch(endConverRatePolling());
+    }
 
     handleBeforeSlide = (isInitial: boolean, slideIndex: number) => {
         const { dispatch, currencies, initialCurrencyKey, targetCurrencyKey } = this.props;
@@ -54,12 +67,16 @@ class Exchanger extends React.Component<Props> {
     };
 
     render() {
-        const { currencies, initialIndex, targetIndex } = this.props;
+        const { currencies, initialIndex, targetIndex, convertRate } = this.props;
 
         return (
             <HorizontalContainer>
                 <VerticalContainer>
+                    <Head>
+                        convert rate {convertRate}
+                    </Head>
                     <Body>
+
                         {this.renderSection(initialIndex, true)}
                         {this.renderSection(targetIndex)}
                     </Body>
@@ -81,6 +98,10 @@ const VerticalContainer = styled.div`
     display: flex;
     flex-direction: column;
     justify-content: center;
+`;
+
+const Head = styled.div`
+    display: flex;
 `;
 
 const Body = styled.div`

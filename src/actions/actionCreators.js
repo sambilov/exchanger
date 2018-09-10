@@ -28,3 +28,11 @@ export const setConvertRate = (convertRate: number) => ({
         convertRate,
     }
 });
+
+export const startConverRatePolling = () => ({
+    type: actionTypes.CONVERT_RATE_POLLING_START,
+});
+
+export const endConverRatePolling = () => ({
+    type: actionTypes.CONVERT_RATE_POLLING_END,
+});

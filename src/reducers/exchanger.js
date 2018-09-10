@@ -7,12 +7,14 @@ type State = {
     currencies: Array<Currency>,
     initialCurrencyKey: string,
     targetCurrencyKey: string,
+    convertRate: number,
 };
 
 const initialState = {
     currencies: [],
     initialCurrencyKey: '',
     targetCurrencyKey: '',
+    convertRate: 1,
 };
 
 export default function exchangerReducer(state: State = initialState, action: Object) {

@@ -1,7 +1,9 @@
-import { all, takeLatest, call, put, select } from 'redux-saga/effects';
+import { all, takeLatest, call, put, select, take, race } from 'redux-saga/effects';
+import { delay } from 'redux-saga';
 import actionTypes from '../actions/actionTypes';
 import { setCurrencies, setConvertCurrencies, setConvertRate } from '../actions/actionCreators';
 import { getRateUrl } from '../helpers';
+import { exchangerSelector } from '../selectors/exchanger';
 
 const currencies = [
     {
@@ -18,10 +20,10 @@ const currencies = [
     },
 ];
 
-async function getRate(initialCurrencyKey, targetCurrencyKey) {
+function* getRate(initialCurrencyKey, targetCurrencyKey) {
     const rateUrl = getRateUrl(initialCurrencyKey);
-    const response = await fetch(rateUrl);
-    const data = await response.json();
+    const response = yield call(fetch, rateUrl);
+    const data = yield call([response, response.json]);
     const { rates } = data;
     const rate = rates[targetCurrencyKey] || 1;
 
@@ -38,14 +40,39 @@ function* requestCurrenciesSaga() {
 
 function* fetchCurrenciesRateSaga(action) {
     const { payload: { initialCurrencyKey, targetCurrencyKey } } = action;
-    const rate = yield getRate(initialCurrencyKey, targetCurrencyKey);
+    const rate = yield call(getRate, initialCurrencyKey, targetCurrencyKey);
 
     yield put(setConvertRate(rate));
+}
+
+function* pollCurrenciesRates() {
+    while (true) {
+        try {
+            const { initialCurrencyKey, targetCurrencyKey } = yield select(exchangerSelector);
+            const rate = yield call(getRate, initialCurrencyKey, targetCurrencyKey);
+
+            yield put(setConvertRate(rate));
+        } catch (error) {
+            console.log(error);
+        }
+        yield call(delay, 10000);
+    }
+}
+
+function* pollingCurrenciesRatesSaga() {
+    while (true) {
+        yield take(actionTypes.CONVERT_RATE_POLLING_START);
+        yield race([
+            call(pollCurrenciesRates),
+            take(actionTypes.CONVERT_RATE_POLLING_END),
+        ]);
+    }
 }
 
 export default function* echangerSaga() {
     yield all([
         takeLatest(actionTypes.CURRENCIES_REQUEST, requestCurrenciesSaga),
         takeLatest(actionTypes.CONVERT_CURRENCIES_SET, fetchCurrenciesRateSaga),
+        call(pollingCurrenciesRatesSaga),
     ]);
 }
