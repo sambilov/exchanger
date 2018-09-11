@@ -10,6 +10,10 @@ import { exchangerSelector, currenciesIndexSelector } from '../../selectors/exch
 import type { Currency } from '../../typeDefinitions';
 import Card from '../../components/Card';
 
+const MAIN_BACKGROUD = '#236bb2';
+const AUXILARY_BACKGROUND = '#5badff';
+const FONT_COLOR = '#ffffff';
+
 type Props = {
     dispatch: Dispatch<*>,
     currencies: Array<Currency>,
@@ -18,6 +22,7 @@ type Props = {
     initialCurrencyKey: string,
     targetCurrencyKey: string,
     convertRate: number,
+    sameCurrency: boolean,
 };
 
 class Exchanger extends React.Component<Props> {
@@ -44,6 +49,10 @@ class Exchanger extends React.Component<Props> {
         dispatch(setConvertCurrencies(newInitialCurrencyKey, newTargetCurrencyKey));
     };
 
+    handleExchangeButtonClick = () => {
+        console.log('clicked');
+    };
+
     renderSection = (slideIndex: number, isInitial: boolean = false) => {
         const { currencies } = this.props;
 
@@ -67,13 +76,25 @@ class Exchanger extends React.Component<Props> {
     };
 
     render() {
-        const { currencies, initialIndex, targetIndex, convertRate } = this.props;
+        const {
+            currencies,
+            initialIndex,
+            targetIndex,
+            initialCurrencyKey,
+            targetCurrencyKey,
+            convertRate
+        } = this.props;
+        const sameCurrency = initialCurrencyKey === targetCurrencyKey;
 
         return (
             <HorizontalContainer>
                 <VerticalContainer>
                     <Head>
-                        convert rate {convertRate}
+                        <Text>1{initialCurrencyKey} = {convertRate}{targetCurrencyKey}</Text>
+                        <ExchangeButton
+                            onClick={this.handleExchangeButtonClick}
+                            disabled={sameCurrency}
+                        >Exchange</ExchangeButton>
                     </Head>
                     <Body>
 
@@ -101,22 +122,36 @@ const VerticalContainer = styled.div`
 `;
 
 const Head = styled.div`
+    position: relative;
     display: flex;
+    justify-content: center;
+    padding: 1rem;
+    background-color: ${MAIN_BACKGROUD};
+    color: ${FONT_COLOR};
+`;
+
+const Text = styled.div``;
+
+const ExchangeButton = styled.button`
+    position: absolute;
+    right: 1rem;
+    background-color: ${MAIN_BACKGROUD};
+    color: ${FONT_COLOR};
 `;
 
 const Body = styled.div`
     width: 400px;
     height: 600px;
-    background-color: #5badff;
     display: flex;
     flex-direction: column;
-    color: #ffffff;
+    background-color: ${MAIN_BACKGROUD};
+    color: ${FONT_COLOR};
 `;
 
 const Section = styled.div`
     flex: 1;
     display: flex;
-    background-color: ${props => props.isInitial ? '#236bb2' : '#5badff'};
+    background-color: ${props => props.isInitial ? MAIN_BACKGROUD : AUXILARY_BACKGROUND};
 `;
 
 function mapStateToProps(state) {
