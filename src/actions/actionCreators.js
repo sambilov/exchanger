@@ -54,3 +54,10 @@ export const setConvertedCurrencies = (currencies: Array<Currency>) => ({
         currencies,
     },
 });
+
+export const setError = (error: Error) => ({
+    type: actionTypes.ERROR_SET,
+    payload: {
+        error,
+    },
+});

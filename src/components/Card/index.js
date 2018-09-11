@@ -34,7 +34,7 @@ export default (props: Props) => {
                 }
             </Section>
             <Section>
-                <Item>You have {amount} {key}</Item>
+                <Item>You have {formatNumber(amount)} {key}</Item>
                 {
                     anotherCurrency
                         ? <Item>1{key} = {formatNumber(anotherCurrency.convertRate)}{anotherCurrency.key}</Item>

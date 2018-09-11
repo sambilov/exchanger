@@ -9,6 +9,7 @@ type State = {
     targetCurrencyKey: string,
     convertRate: number,
     convertAmount: number,
+    error: ?Error,
 };
 
 const initialState = {
@@ -17,6 +18,7 @@ const initialState = {
     targetCurrencyKey: '',
     convertRate: 1,
     convertAmount: 0,
+    error: null,
 };
 
 export default function exchangerReducer(state: State = initialState, action: Object) {
@@ -28,6 +30,12 @@ export default function exchangerReducer(state: State = initialState, action: Ob
         case actionTypes.CONVERT_RATE_SET:
         case actionTypes.CONVERT_AMOUNT_SET:
         case actionTypes.CONVERTED_CURRENCIES_SET:
+            return {
+                ...state,
+                ...payload,
+                error: null,
+            };
+        case actionTypes.ERROR_SET:
             return {
                 ...state,
                 ...payload,

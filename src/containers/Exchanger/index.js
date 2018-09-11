@@ -35,6 +35,7 @@ type Props = {
     reverseConvertRate: number,
     convertAmount: number,
     convertedAmount: number,
+    error: ?Error,
 };
 
 class Exchanger extends React.Component<Props> {
@@ -61,6 +62,7 @@ class Exchanger extends React.Component<Props> {
         const newTargetCurrencyKey = isInitial ? targetCurrency.key : newCurrencyKey;
 
         dispatch(setConvertCurrencies(newInitialCurrencyKey, newTargetCurrencyKey));
+        dispatch(setConvertAmount(0));
     };
 
     handleExchangeButtonClick = () => {
@@ -134,6 +136,16 @@ class Exchanger extends React.Component<Props> {
         );
     };
 
+    renderError = () => {
+        const { error } = this.props;
+
+        return (
+            <Error>
+                {error ? error.message : ''}
+            </Error>
+        );
+    };
+
     renderBody = () => {
         const { initialCurrencyIndex, targetCurrencyIndex } = this.props;
 
@@ -155,6 +167,7 @@ class Exchanger extends React.Component<Props> {
                 <VerticalWrapper>
                     <Container>
                         {this.renderHead()}
+                        {this.renderError()}
                         {this.renderBody()}
                     </Container>
                 </VerticalWrapper>
@@ -179,6 +192,8 @@ const VerticalWrapper = styled.div`
 
 const Container = styled.div`
     width: ${WIDTH};
+    background-color: ${MAIN_BACKGROUD};
+    color: ${FONT_COLOR};
 `;
 
 const Head = styled.div`
@@ -186,8 +201,6 @@ const Head = styled.div`
     display: flex;
     justify-content: center;
     padding: 1rem;
-    background-color: ${MAIN_BACKGROUD};
-    color: ${FONT_COLOR};
 `;
 
 const Text = styled.div``;
@@ -202,14 +215,19 @@ const ExchangeButton = styled.button`
 const Body = styled.div`
     display: flex;
     flex-direction: column;
-    background-color: ${MAIN_BACKGROUD};
-    color: ${FONT_COLOR};
 `;
 
 const Section = styled.div`
     flex: 1;
     display: flex;
     background-color: ${props => props.isInitial ? MAIN_BACKGROUD : AUXILARY_BACKGROUND};
+`;
+
+const Error = styled.div`
+    height: 30px;
+    color: red;
+    display: flex;
+    justify-content: center;
 `;
 
 function mapStateToProps(state) {

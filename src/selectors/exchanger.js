@@ -8,7 +8,14 @@ export const baseSelector = (state: Object) => state.exchanger;
 export const exchangerSelector = createSelector(
     [baseSelector],
     (exchangerState: Object) => {
-        const { currencies, initialCurrencyKey, targetCurrencyKey, convertRate, convertAmount } = exchangerState;
+        const {
+            currencies,
+            initialCurrencyKey,
+            targetCurrencyKey,
+            convertRate,
+            convertAmount,
+            error,
+        } = exchangerState;
         const initialCurrencyIndex = currencies.findIndex(el => el.key === initialCurrencyKey);
         const targetCurrencyIndex = currencies.findIndex(el => el.key === targetCurrencyKey);
         const initialCurrency = currencies[initialCurrencyIndex];
@@ -26,6 +33,7 @@ export const exchangerSelector = createSelector(
             reverseConvertRate,
             convertAmount,
             convertedAmount,
+            error,
         };
     },
 );

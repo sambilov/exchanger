@@ -1,7 +1,13 @@
 import { all, takeLatest, call, put, select, take, race } from 'redux-saga/effects';
 import { delay } from 'redux-saga';
 import actionTypes from '../actions/actionTypes';
-import { setCurrencies, setConvertCurrencies, setConvertRate, setConvertedCurrencies } from '../actions/actionCreators';
+import {
+    setCurrencies,
+    setConvertCurrencies,
+    setConvertRate,
+    setConvertedCurrencies,
+    setError,
+} from '../actions/actionCreators';
 import { getRateUrl } from '../helpers';
 import { exchangerSelector } from '../selectors/exchanger';
 
@@ -83,17 +89,23 @@ function* convertation() {
         targetCurrencyIndex,
     } = yield select(exchangerSelector);
     const newCurrencies = [...currencies];
+    const newInitialCurrencyAmount = initialCurrency.amount + convertAmount;
+    const newTargetCurrencyAmount = targetCurrency.amount - (convertAmount * convertRate);
 
-    newCurrencies[initialCurrencyIndex] = {
-        ...currencies[initialCurrencyIndex],
-        amount: currencies[initialCurrencyIndex].amount + convertAmount,
-    };
-    newCurrencies[targetCurrencyIndex] = {
-        ...currencies[targetCurrencyIndex],
-        amount: currencies[targetCurrencyIndex].amount - (convertAmount * convertRate)
-    };
-
-    yield put(setConvertedCurrencies(newCurrencies));
+    if (newInitialCurrencyAmount < 0 || newTargetCurrencyAmount < 0) {
+        yield put(setError(new Error('NOT ENOUGH AMOUNT')));
+    } else {
+        newCurrencies[initialCurrencyIndex] = {
+            ...initialCurrency,
+            amount: newInitialCurrencyAmount,
+        };
+        newCurrencies[targetCurrencyIndex] = {
+            ...targetCurrency,
+            amount: newTargetCurrencyAmount
+        };
+    
+        yield put(setConvertedCurrencies(newCurrencies));
+    }
 }
 
 export default function* echangerSaga() {
