@@ -84,13 +84,13 @@ function* convertation() {
         initialCurrency,
         targetCurrency,
         convertRate,
-        convertAmount,
+        numericConvertAmount,
         initialCurrencyIndex,
         targetCurrencyIndex,
     } = yield select(exchangerSelector);
     const newCurrencies = [...currencies];
-    const newInitialCurrencyAmount = initialCurrency.amount + convertAmount;
-    const newTargetCurrencyAmount = targetCurrency.amount - (convertAmount * convertRate);
+    const newInitialCurrencyAmount = initialCurrency.amount + numericConvertAmount;
+    const newTargetCurrencyAmount = targetCurrency.amount - (numericConvertAmount * convertRate);
 
     if (newInitialCurrencyAmount < 0 || newTargetCurrencyAmount < 0) {
         yield put(setError(new Error('NOT ENOUGH AMOUNT')));

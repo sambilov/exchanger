@@ -37,7 +37,7 @@ export const endConverRatePolling = () => ({
     type: actionTypes.CONVERT_RATE_POLLING_END,
 });
 
-export const setConvertAmount = (convertAmount: number) => ({
+export const setConvertAmount = (convertAmount: string) => ({
     type: actionTypes.CONVERT_AMOUNT_SET,
     payload: {
         convertAmount,

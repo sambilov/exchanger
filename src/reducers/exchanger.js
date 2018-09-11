@@ -8,7 +8,7 @@ type State = {
     initialCurrencyKey: string,
     targetCurrencyKey: string,
     convertRate: number,
-    convertAmount: number,
+    convertAmount: string,
     error: ?Error,
 };
 
@@ -17,7 +17,7 @@ const initialState = {
     initialCurrencyKey: '',
     targetCurrencyKey: '',
     convertRate: 1,
-    convertAmount: 0,
+    convertAmount: '',
     error: null,
 };
 

@@ -62,7 +62,7 @@ class Exchanger extends React.Component<Props> {
         const newTargetCurrencyKey = isInitial ? targetCurrency.key : newCurrencyKey;
 
         dispatch(setConvertCurrencies(newInitialCurrencyKey, newTargetCurrencyKey));
-        dispatch(setConvertAmount(0));
+        if(isInitial) dispatch(setConvertAmount(0));
     };
 
     handleExchangeButtonClick = () => {
@@ -73,10 +73,11 @@ class Exchanger extends React.Component<Props> {
 
     handleConvertAmountChange = (event: Event) => {
         const { dispatch } = this.props;
-        const rawValue = event.target.value;
-        const value = parseFloat(rawValue) || 0;
-
-        dispatch(setConvertAmount(value));
+        const value = event.target.value;
+        
+        if (/^(\+|-)?(\d*|(\d+\.\d*))$/g.test(value)) {
+            dispatch(setConvertAmount(value));
+        }
     };
 
     renderSection = (selectedItemIndex: number, isInitial: boolean = false) => {

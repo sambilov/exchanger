@@ -21,7 +21,8 @@ export const exchangerSelector = createSelector(
         const initialCurrency = currencies[initialCurrencyIndex];
         const targetCurrency = currencies[targetCurrencyIndex];
         const reverseConvertRate = 1/convertRate;
-        const convertedAmount = convertAmount * convertRate;
+        const numericConvertAmount = parseFloat(convertAmount) || parseFloat(convertAmount + '0');
+        const convertedAmount = numericConvertAmount * convertRate * -1;
 
         return {
             currencies,
@@ -32,6 +33,7 @@ export const exchangerSelector = createSelector(
             convertRate,
             reverseConvertRate,
             convertAmount,
+            numericConvertAmount,
             convertedAmount,
             error,
         };
