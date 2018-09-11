@@ -1,7 +1,7 @@
 import { all, takeLatest, call, put, select, take, race } from 'redux-saga/effects';
 import { delay } from 'redux-saga';
 import actionTypes from '../actions/actionTypes';
-import { setCurrencies, setConvertCurrencies, setConvertRate } from '../actions/actionCreators';
+import { setCurrencies, setConvertCurrencies, setConvertRate, setConvertedCurrencies } from '../actions/actionCreators';
 import { getRateUrl } from '../helpers';
 import { exchangerSelector } from '../selectors/exchanger';
 
@@ -30,7 +30,7 @@ function* getRate(initialCurrencyKey, targetCurrencyKey) {
     return rate;
 }
 
-function* requestCurrenciesSaga() {
+function* requestCurrencies() {
     const initialCurrency = currencies[0];
     const lastCurrency = currencies[currencies.length - 1];
 
@@ -38,7 +38,7 @@ function* requestCurrenciesSaga() {
     yield put(setConvertCurrencies(initialCurrency.key, lastCurrency.key));
 }   
 
-function* fetchCurrenciesRateSaga(action) {
+function* fetchCurrenciesRate(action) {
     const { payload: { initialCurrencyKey, targetCurrencyKey } } = action;
     const rate = yield call(getRate, initialCurrencyKey, targetCurrencyKey);
 
@@ -48,7 +48,10 @@ function* fetchCurrenciesRateSaga(action) {
 function* pollCurrenciesRates() {
     while (true) {
         try {
-            const { initialCurrencyKey, targetCurrencyKey } = yield select(exchangerSelector);
+            const {
+                initialCurrency: { key: initialCurrencyKey },
+                targetCurrency: { key: targetCurrencyKey },
+            } = yield select(exchangerSelector);
             const rate = yield call(getRate, initialCurrencyKey, targetCurrencyKey);
 
             yield put(setConvertRate(rate));
@@ -59,7 +62,7 @@ function* pollCurrenciesRates() {
     }
 }
 
-function* pollingCurrenciesRatesSaga() {
+function* pollingCurrenciesRates() {
     while (true) {
         yield take(actionTypes.CONVERT_RATE_POLLING_START);
         yield race([
@@ -69,10 +72,35 @@ function* pollingCurrenciesRatesSaga() {
     }
 }
 
+function* convertation() {
+    const {
+        currencies,
+        initialCurrency,
+        targetCurrency,
+        convertRate,
+        convertAmount,
+        initialCurrencyIndex,
+        targetCurrencyIndex,
+    } = yield select(exchangerSelector);
+    const newCurrencies = [...currencies];
+
+    newCurrencies[initialCurrencyIndex] = {
+        ...currencies[initialCurrencyIndex],
+        amount: currencies[initialCurrencyIndex].amount + convertAmount,
+    };
+    newCurrencies[targetCurrencyIndex] = {
+        ...currencies[targetCurrencyIndex],
+        amount: currencies[targetCurrencyIndex].amount - (convertAmount * convertRate)
+    };
+
+    yield put(setConvertedCurrencies(newCurrencies));
+}
+
 export default function* echangerSaga() {
     yield all([
-        takeLatest(actionTypes.CURRENCIES_REQUEST, requestCurrenciesSaga),
-        takeLatest(actionTypes.CONVERT_CURRENCIES_SET, fetchCurrenciesRateSaga),
-        call(pollingCurrenciesRatesSaga),
+        takeLatest(actionTypes.CURRENCIES_REQUEST, requestCurrencies),
+        takeLatest(actionTypes.CONVERT_CURRENCIES_SET, fetchCurrenciesRate),
+        takeLatest(actionTypes.CONVERTATION_REQUEST, convertation),
+        call(pollingCurrenciesRates),
     ]);
 }

@@ -36,3 +36,21 @@ export const startConverRatePolling = () => ({
 export const endConverRatePolling = () => ({
     type: actionTypes.CONVERT_RATE_POLLING_END,
 });
+
+export const setConvertAmount = (convertAmount: number) => ({
+    type: actionTypes.CONVERT_AMOUNT_SET,
+    payload: {
+        convertAmount,
+    },
+});
+
+export const requestConvertation = () => ({
+    type: actionTypes.CONVERTATION_REQUEST,
+});
+
+export const setConvertedCurrencies = (currencies: Array<Currency>) => ({
+    type: actionTypes.CONVERTED_CURRENCIES_SET,
+    payload: {
+        currencies,
+    },
+});

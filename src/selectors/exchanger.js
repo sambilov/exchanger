@@ -3,28 +3,29 @@
 import { createSelector } from 'reselect';
 import { create } from 'domain';
 
-export const exchangerSelector = (state: Object) => state.exchanger;
+export const baseSelector = (state: Object) => state.exchanger;
 
-export const reverseConvertRateSelector = createSelector(
-    [exchangerSelector],
+export const exchangerSelector = createSelector(
+    [baseSelector],
     (exchangerState: Object) => {
-        const { convertRate } = exchangerState;
+        const { currencies, initialCurrencyKey, targetCurrencyKey, convertRate, convertAmount } = exchangerState;
+        const initialCurrencyIndex = currencies.findIndex(el => el.key === initialCurrencyKey);
+        const targetCurrencyIndex = currencies.findIndex(el => el.key === targetCurrencyKey);
+        const initialCurrency = currencies[initialCurrencyIndex];
+        const targetCurrency = currencies[targetCurrencyIndex];
         const reverseConvertRate = 1/convertRate;
-        
-        return reverseConvertRate;
-    },
-);
-
-export const currenciesIndexSelector = createSelector(
-    [exchangerSelector],
-    (exchangerState: Object) => {
-        const { currencies, initialCurrencyKey, targetCurrencyKey } = exchangerState;
-        const initialIndex = currencies.findIndex(el => el.key === initialCurrencyKey);
-        const targetIndex = currencies.findIndex(el => el.key === targetCurrencyKey);
+        const convertedAmount = convertAmount * convertRate;
 
         return {
-            initialIndex,
-            targetIndex,
+            currencies,
+            initialCurrencyIndex,
+            targetCurrencyIndex,
+            initialCurrency,
+            targetCurrency,
+            convertRate,
+            reverseConvertRate,
+            convertAmount,
+            convertedAmount,
         };
     },
 );

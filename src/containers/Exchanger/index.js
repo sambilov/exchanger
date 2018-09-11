@@ -6,8 +6,14 @@ import type { Dispatch } from 'redux';
 import styled from 'styled-components';
 import { Carousel } from 'react-responsive-carousel';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
-import { setConvertCurrencies, startConverRatePolling, endConverRatePolling } from '../../actions/actionCreators';
-import { exchangerSelector, currenciesIndexSelector, reverseConvertRateSelector } from '../../selectors/exchanger';
+import {
+    setConvertCurrencies,
+    startConverRatePolling,
+    endConverRatePolling,
+    setConvertAmount,
+    requestConvertation,
+} from '../../actions/actionCreators';
+import { exchangerSelector } from '../../selectors/exchanger';
 import type { Currency } from '../../typeDefinitions';
 import Card from '../../components/Card';
 import { formatNumber } from '../../helpers';
@@ -16,17 +22,19 @@ import './index.css';
 const MAIN_BACKGROUD = '#236bb2';
 const AUXILARY_BACKGROUND = '#5badff';
 const FONT_COLOR = '#ffffff';
-const WIDTH = 400;
+const WIDTH = '400px';
 
 type Props = {
     dispatch: Dispatch<*>,
     currencies: Array<Currency>,
-    initialIndex: number,
-    targetIndex: number,
-    initialCurrencyKey: string,
-    targetCurrencyKey: string,
+    initialCurrencyIndex: number,
+    targetCurrencyIndex: number,
+    initialCurrency: Currency,
+    targetCurrency: Currency,
     convertRate: number,
-    reverseConverRate: number,
+    reverseConvertRate: number,
+    convertAmount: number,
+    convertedAmount: number,
 };
 
 class Exchanger extends React.Component<Props> {
@@ -46,21 +54,31 @@ class Exchanger extends React.Component<Props> {
     handleCarouselChange = (isInitial: boolean, slideIndex: number) => {
         console.log(slideIndex);
 
-        const { dispatch, currencies, initialCurrencyKey, targetCurrencyKey } = this.props;
+        const { dispatch, currencies, initialCurrency, targetCurrency } = this.props;
         const newCurrency = currencies[slideIndex];
         const newCurrencyKey = newCurrency.key;
-        const newInitialCurrencyKey = isInitial ? newCurrencyKey : initialCurrencyKey;
-        const newTargetCurrencyKey = isInitial ? targetCurrencyKey : newCurrencyKey;
+        const newInitialCurrencyKey = isInitial ? newCurrencyKey : initialCurrency.key;
+        const newTargetCurrencyKey = isInitial ? targetCurrency.key : newCurrencyKey;
 
         dispatch(setConvertCurrencies(newInitialCurrencyKey, newTargetCurrencyKey));
     };
 
     handleExchangeButtonClick = () => {
-        console.log('clicked');
+        const { dispatch } = this.props;
+
+        dispatch(requestConvertation());
+    };
+
+    handleConvertAmountChange = (event: Event) => {
+        const { dispatch } = this.props;
+        const rawValue = event.target.value;
+        const value = parseFloat(rawValue) || 0;
+
+        dispatch(setConvertAmount(value));
     };
 
     renderSection = (selectedItemIndex: number, isInitial: boolean = false) => {
-        const { currencies, initialCurrencyKey, reverseConverRate } = this.props;
+        const { currencies, initialCurrency, reverseConvertRate, convertAmount, convertedAmount } = this.props;
 
         return (
             <Section isInitial={isInitial}>
@@ -80,9 +98,15 @@ class Exchanger extends React.Component<Props> {
                         key={currency.key}
                         currency={currency}
                         {
-                            ...isInitial ? {} : {
-                                anotherCurrencyKey: initialCurrencyKey,
-                                converRate: reverseConverRate
+                            ...isInitial ? {
+                                handleChange: this.handleConvertAmountChange,
+                                convertAmount,
+                            } : {
+                                anotherCurrency: {
+                                    key: initialCurrency.key,
+                                    convertRate: reverseConvertRate,
+                                },
+                                convertAmount: convertedAmount,
                             }
                         }
                     />))}
@@ -92,7 +116,11 @@ class Exchanger extends React.Component<Props> {
     };
 
     renderHead = () => {
-        const { initialCurrencyKey, targetCurrencyKey, convertRate } = this.props;
+        const {
+            initialCurrency: { key: initialCurrencyKey },
+            targetCurrency: { key: targetCurrencyKey },
+            convertRate,
+        } = this.props;
         const sameCurrency = initialCurrencyKey === targetCurrencyKey;
 
         return (
@@ -107,26 +135,20 @@ class Exchanger extends React.Component<Props> {
     };
 
     renderBody = () => {
-        const { initialIndex, targetIndex } = this.props;
+        const { initialCurrencyIndex, targetCurrencyIndex } = this.props;
 
         return (
             <Body>
-                {this.renderSection(initialIndex, true)}
-                {this.renderSection(targetIndex)}
+                {this.renderSection(initialCurrencyIndex, true)}
+                {this.renderSection(targetCurrencyIndex)}
             </Body>
         );
     };
 
     render() {
-        const {
-            currencies,
-            initialIndex,
-            targetIndex,
-            initialCurrencyKey,
-            targetCurrencyKey,
-            convertRate
-        } = this.props;
-        const sameCurrency = initialCurrencyKey === targetCurrencyKey;
+        const { currencies } = this.props;
+
+        if (!currencies.length) return null;
 
         return (
             <HorizontalWrapper>
@@ -156,7 +178,7 @@ const VerticalWrapper = styled.div`
 `;
 
 const Container = styled.div`
-    width: ${WIDTH}px;
+    width: ${WIDTH};
 `;
 
 const Head = styled.div`
@@ -193,8 +215,6 @@ const Section = styled.div`
 function mapStateToProps(state) {
     return {
         ...exchangerSelector(state),
-        ...currenciesIndexSelector(state),
-        reverseConverRate: reverseConvertRateSelector(state),
     };
 }
 
