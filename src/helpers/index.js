@@ -7,3 +7,9 @@ export function getRateUrl(currency) {
 
     return `${rateUrl}?base=${currency}`;
 }
+
+export function formatNumber(number: number, mantissaLength: number = 3) {
+    const formatted = number.toFixed(mantissaLength);
+
+    return formatted;
+}

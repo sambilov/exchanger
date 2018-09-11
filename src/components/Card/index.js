@@ -3,23 +3,31 @@
 import * as React from 'react';
 import styled from 'styled-components';
 import type { Currency } from '../../typeDefinitions';
+import { formatNumber } from '../../helpers';
 
 type Props = {
     currency: Currency,
+    converRate?: number,
+    anotherCurrencyKey?: string,
+    style?: Object,
 };
 
 export default (props: Props) => {
-    const { currency: { amount, key } } = props;
+    const { currency: { amount, key }, converRate, anotherCurrencyKey, style } = props;
 
     return (
-        <Container>
+        <Container style={style}>
             <Section main>
                 <Item>{key}</Item>
                 <Item></Item>
             </Section>
             <Section>
-                <Item>You have {amount}</Item>
-                <Item>test</Item>
+                <Item>You have {amount} {key}</Item>
+                {
+                    anotherCurrencyKey
+                        ? <Item>1{key} = {formatNumber(converRate)}{anotherCurrencyKey}</Item>
+                        : null
+                }
             </Section>
         </Container>
     );
@@ -29,7 +37,7 @@ const Container = styled.div`
     flex: 1;
     display: flex;
     flex-direction: column;
-    padding: 1rem 2rem;
+    padding: 2rem;
 `;
 
 const Section = styled.div`

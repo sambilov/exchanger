@@ -7,13 +7,16 @@ import styled from 'styled-components';
 import { Carousel } from 'react-responsive-carousel';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import { setConvertCurrencies, startConverRatePolling, endConverRatePolling } from '../../actions/actionCreators';
-import { exchangerSelector, currenciesIndexSelector } from '../../selectors/exchanger';
+import { exchangerSelector, currenciesIndexSelector, reverseConvertRateSelector } from '../../selectors/exchanger';
 import type { Currency } from '../../typeDefinitions';
 import Card from '../../components/Card';
+import { formatNumber } from '../../helpers';
+import './index.css';
 
 const MAIN_BACKGROUD = '#236bb2';
 const AUXILARY_BACKGROUND = '#5badff';
 const FONT_COLOR = '#ffffff';
+const WIDTH = 400;
 
 type Props = {
     dispatch: Dispatch<*>,
@@ -23,7 +26,7 @@ type Props = {
     initialCurrencyKey: string,
     targetCurrencyKey: string,
     convertRate: number,
-    sameCurrency: boolean,
+    reverseConverRate: number,
 };
 
 class Exchanger extends React.Component<Props> {
@@ -57,18 +60,18 @@ class Exchanger extends React.Component<Props> {
     };
 
     renderSection = (selectedItemIndex: number, isInitial: boolean = false) => {
-        const { currencies } = this.props;
+        const { currencies, initialCurrencyKey, reverseConverRate } = this.props;
 
         return (
             <Section isInitial={isInitial}>
                 <Carousel
-                    // wrapAround
-                    // afterSlide={slideIndex => this.handleBeforeSlide(isInitial, slideIndex)}
-                    // slideIndex={slideIndex}
                     style={{
                         flex: 1,
+                        backgroundColor: isInitial ? MAIN_BACKGROUD : AUXILARY_BACKGROUND,
                     }}
+                    width={400}
                     showThumbs={false}
+                    showStatus={false}
                     infiniteLoop
                     onChange={slideIndex => this.handleCarouselChange(isInitial, slideIndex)}
                     selectedItem={selectedItemIndex}
@@ -76,9 +79,41 @@ class Exchanger extends React.Component<Props> {
                     {currencies.map(currency => (<Card
                         key={currency.key}
                         currency={currency}
+                        {
+                            ...isInitial ? {} : {
+                                anotherCurrencyKey: initialCurrencyKey,
+                                converRate: reverseConverRate
+                            }
+                        }
                     />))}
                 </Carousel>
             </Section>
+        );
+    };
+
+    renderHead = () => {
+        const { initialCurrencyKey, targetCurrencyKey, convertRate } = this.props;
+        const sameCurrency = initialCurrencyKey === targetCurrencyKey;
+
+        return (
+            <Head>
+                <Text>1{initialCurrencyKey} = {formatNumber(convertRate)}{targetCurrencyKey}</Text>
+                <ExchangeButton
+                    onClick={this.handleExchangeButtonClick}
+                    disabled={sameCurrency}
+                >Exchange</ExchangeButton>
+            </Head>
+        );
+    };
+
+    renderBody = () => {
+        const { initialIndex, targetIndex } = this.props;
+
+        return (
+            <Body>
+                {this.renderSection(initialIndex, true)}
+                {this.renderSection(targetIndex)}
+            </Body>
         );
     };
 
@@ -94,38 +129,34 @@ class Exchanger extends React.Component<Props> {
         const sameCurrency = initialCurrencyKey === targetCurrencyKey;
 
         return (
-            <HorizontalContainer>
-                <VerticalContainer>
-                    <Head>
-                        <Text>1{initialCurrencyKey} = {convertRate}{targetCurrencyKey}</Text>
-                        <ExchangeButton
-                            onClick={this.handleExchangeButtonClick}
-                            disabled={sameCurrency}
-                        >Exchange</ExchangeButton>
-                    </Head>
-                    <Body>
-
-                        {this.renderSection(initialIndex, true)}
-                        {this.renderSection(targetIndex)}
-                    </Body>
-                </VerticalContainer>
-            </HorizontalContainer>
+            <HorizontalWrapper>
+                <VerticalWrapper>
+                    <Container>
+                        {this.renderHead()}
+                        {this.renderBody()}
+                    </Container>
+                </VerticalWrapper>
+            </HorizontalWrapper>
         );
     }
 
 }
 
-const HorizontalContainer = styled.div`
+const HorizontalWrapper = styled.div`
     display: flex;
     flex-direction: row;
     justify-content: center;
     flex: 1;
 `;
 
-const VerticalContainer = styled.div`
+const VerticalWrapper = styled.div`
     display: flex;
     flex-direction: column;
     justify-content: center;
+`;
+
+const Container = styled.div`
+    width: ${WIDTH}px;
 `;
 
 const Head = styled.div`
@@ -147,8 +178,6 @@ const ExchangeButton = styled.button`
 `;
 
 const Body = styled.div`
-    width: 400px;
-    height: 600px;
     display: flex;
     flex-direction: column;
     background-color: ${MAIN_BACKGROUD};
@@ -165,6 +194,7 @@ function mapStateToProps(state) {
     return {
         ...exchangerSelector(state),
         ...currenciesIndexSelector(state),
+        reverseConverRate: reverseConvertRateSelector(state),
     };
 }
 
