@@ -4,7 +4,8 @@ import * as React from 'react';
 import { connect } from 'react-redux';
 import type { Dispatch } from 'redux';
 import styled from 'styled-components';
-import Carousel from 'nuka-carousel';
+import { Carousel } from 'react-responsive-carousel';
+import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import { setConvertCurrencies, startConverRatePolling, endConverRatePolling } from '../../actions/actionCreators';
 import { exchangerSelector, currenciesIndexSelector } from '../../selectors/exchanger';
 import type { Currency } from '../../typeDefinitions';
@@ -39,7 +40,9 @@ class Exchanger extends React.Component<Props> {
         dispatch(endConverRatePolling());
     }
 
-    handleBeforeSlide = (isInitial: boolean, slideIndex: number) => {
+    handleCarouselChange = (isInitial: boolean, slideIndex: number) => {
+        console.log(slideIndex);
+
         const { dispatch, currencies, initialCurrencyKey, targetCurrencyKey } = this.props;
         const newCurrency = currencies[slideIndex];
         const newCurrencyKey = newCurrency.key;
@@ -53,18 +56,22 @@ class Exchanger extends React.Component<Props> {
         console.log('clicked');
     };
 
-    renderSection = (slideIndex: number, isInitial: boolean = false) => {
+    renderSection = (selectedItemIndex: number, isInitial: boolean = false) => {
         const { currencies } = this.props;
 
         return (
             <Section isInitial={isInitial}>
                 <Carousel
-                    wrapAround
-                    afterSlide={slideIndex => this.handleBeforeSlide(isInitial, slideIndex)}
-                    slideIndex={slideIndex}
+                    // wrapAround
+                    // afterSlide={slideIndex => this.handleBeforeSlide(isInitial, slideIndex)}
+                    // slideIndex={slideIndex}
                     style={{
                         flex: 1,
                     }}
+                    showThumbs={false}
+                    infiniteLoop
+                    onChange={slideIndex => this.handleCarouselChange(isInitial, slideIndex)}
+                    selectedItem={selectedItemIndex}
                 >
                     {currencies.map(currency => (<Card
                         key={currency.key}
